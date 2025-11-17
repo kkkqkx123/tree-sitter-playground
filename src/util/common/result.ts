@@ -1,7 +1,3 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation and GitHub. All rights reserved.
- *--------------------------------------------------------------------------------------------*/
-
 export type Result<T, K> = ResultOk<T> | ResultErr<K>;
 
 export namespace Result {

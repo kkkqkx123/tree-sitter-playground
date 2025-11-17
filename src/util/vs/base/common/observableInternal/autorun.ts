@@ -1,13 +1,6 @@
-//!!! DO NOT modify, this file was COPIED from 'microsoft/vscode'
-
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
-
 import { IChangeContext, IObservable, IObserver, IReader } from './base';
-import { DebugNameData, IDebugNameData } from './debugName';
 import { assertFn, BugIndicatingError, DisposableStore, IDisposable, markAsDisposed, onBugIndicatingError, toDisposable, trackDisposable } from './commonFacade/deps';
+import { DebugNameData, IDebugNameData } from './debugName';
 import { getLogger } from './logging';
 
 /**

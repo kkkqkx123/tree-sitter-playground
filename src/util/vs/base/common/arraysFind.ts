@@ -1,10 +1,3 @@
-//!!! DO NOT modify, this file was COPIED from 'microsoft/vscode'
-
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
-
 import { Comparator } from './arrays';
 
 export function findLast<T>(array: readonly T[], predicate: (item: T) => boolean): T | undefined {

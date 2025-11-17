@@ -7,7 +7,6 @@
 
 import { CharCode } from './charCode';
 import { LRUCache } from './map';
-import { getKoreanAltChars } from './naturalLanguage/korean';
 import * as strings from './strings';
 
 export interface IFilter {
@@ -155,10 +154,6 @@ function getAlternateCodes(code: number): ArrayLike<number> | undefined {
 	// supported by a single "alt codes provider".
 	// `ArrayLike<ArrayLike<number>>` is a more appropriate type if changed.
 	let result: ArrayLike<number> | undefined;
-	const codes = getKoreanAltChars(code);
-	if (codes) {
-		result = codes;
-	}
 
 	alternateCharsCache.set(code, result);
 	return result;
