@@ -1,13 +1,13 @@
-import Parser, { TreeCursor } from "web-tree-sitter";
+import { Parser, TreeCursor, Node } from "web-tree-sitter";
 
 type NodeProcessor = {
 	/**
-	 * @remark can access current node using `cursor.currentNode()`; don't modify the cursor
+	 * @remark can access current node using `cursor.currentNode`; don't modify the cursor
 	 */
 	(cursor: TreeCursor, depth: number): void;
 };
 
-export function traverseDFPreOrder(node: Parser.SyntaxNode, fn: NodeProcessor) {
+export function traverseDFPreOrder(node: Node, fn: NodeProcessor) {
 
 	const cursor = node.walk();
 	let depth = 0;

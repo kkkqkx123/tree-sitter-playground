@@ -8,12 +8,12 @@
 import { CancellationToken, CancellationTokenSource } from './cancellation';
 import { BugIndicatingError, CancellationError } from './errors';
 import { Emitter, Event } from './event';
-import { Disposable, DisposableMap, DisposableStore, IDisposable, MutableDisposable, toDisposable } from './lifecycle';
-import { extUri as defaultExtUri, IExtUri } from './resources';
-import { URI } from './uri';
-import { setTimeout0 } from './platform';
-import { MicrotaskDelay } from './symbols';
 import { Lazy } from './lazy';
+import { Disposable, DisposableMap, DisposableStore, IDisposable, MutableDisposable, toDisposable } from './lifecycle';
+import { setTimeout0 } from './platform';
+import { extUri as defaultExtUri, IExtUri } from './resources';
+import { MicrotaskDelay } from './symbols';
+import { URI } from './uri';
 
 export function isThenable<T>(obj: unknown): obj is Promise<T> {
 	return !!obj && typeof (obj as unknown as Promise<T>).then === 'function';
@@ -1448,7 +1448,7 @@ export async function retry<T>(task: ITask<Promise<T>>, delay: number, retries: 
 		try {
 			return await task();
 		} catch (error) {
-			lastError = error;
+			lastError = error instanceof Error ? error : new Error(String(error));
 
 			await timeout(delay);
 		}
@@ -1901,7 +1901,7 @@ export class AsyncIterableObject<T> implements AsyncIterable<T> {
 				await Promise.resolve(executor(writer));
 				this.resolve();
 			} catch (err) {
-				this.reject(err);
+				this.reject(err instanceof Error ? err : new Error(String(err)));
 			} finally {
 				writer.emitOne = undefined!;
 				writer.emitMany = undefined!;
@@ -2076,7 +2076,7 @@ export function createCancelableAsyncIterable<T>(callback: (token: CancellationT
 		} catch (err) {
 			subscription.dispose();
 			source.dispose();
-			emitter.reject(err);
+			emitter.reject(err instanceof Error ? err : new Error(String(err)));
 		}
 	});
 }

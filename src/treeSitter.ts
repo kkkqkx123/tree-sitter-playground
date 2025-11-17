@@ -1,5 +1,5 @@
 import { Uri } from 'vscode';
-import Parser from "web-tree-sitter";
+import { Parser, Language } from "web-tree-sitter";
 
 export function getWasmLanguage(languageId: string) {
     switch (languageId) {
@@ -43,9 +43,9 @@ export enum WASMLanguage {
 }
 
 class LangLoader {
-    private map = new Map<WASMLanguage, Parser.Language>();
+    private map = new Map<WASMLanguage, Language>();
 
-    async loadLanguage(extensionUri: Uri, language: WASMLanguage): Promise<Parser.Language> {
+    async loadLanguage(extensionUri: Uri, language: WASMLanguage): Promise<Language> {
         if (this.map.has(language)) {
             return Promise.resolve(this.map.get(language)!);
         }
@@ -59,7 +59,7 @@ class LangLoader {
         const wasmUri = Uri.joinPath(extensionUri, 'dist', wasmFilename);
         const wasmFile = wasmUri.scheme === 'file' ? wasmUri.fsPath : wasmUri.toString(true);
 
-        const parserLang = await Parser.Language.load(wasmFile);
+        const parserLang = await Language.load(wasmFile);
 
         this.map.set(language, parserLang);
 

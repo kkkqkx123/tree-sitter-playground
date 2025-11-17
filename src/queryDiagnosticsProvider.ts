@@ -1,11 +1,11 @@
 import * as vscode from 'vscode';
-import Parser from 'web-tree-sitter';
+import { Parser, Node, Query, QueryMatch } from 'web-tree-sitter';
 import { WASMLanguage, wasmLanguageLoader } from './treeSitter';
 import { Lazy } from './utils';
 
 export class QueryDiagnosticsProvider {
 
-	private treeSitterQueryTemplateStringQuery: Parser.Query | undefined;
+	private treeSitterQueryTemplateStringQuery: Query | undefined;
 
 	private queryDiagnosticsCollection: vscode.DiagnosticCollection;
 	private disposables: vscode.Disposable[] = [];
@@ -79,6 +79,9 @@ export class QueryDiagnosticsProvider {
 		parser.setLanguage(typescriptLanguage);
 		try {
 			const parseTree = parser.parse(document.getText());
+			if (!parseTree) {
+				return;
+			}
 			const matches = this.treeSitterQueryTemplateStringQuery!.matches(parseTree.rootNode);
 			if (matches.length === 0) {
 				return;
@@ -183,8 +186,8 @@ class InSourceTreeSitterQuery {
 	readonly _querySrc: Lazy<string>;
 
 	constructor(
-		readonly targetLanguage: Parser.SyntaxNode,
-		readonly queryWithQuotes: Parser.SyntaxNode,
+		readonly targetLanguage: Node,
+		readonly queryWithQuotes: Node,
 	) {
 		this._querySrc = new Lazy(() => this.queryWithQuotes.text.slice(1, -1));
 	}
@@ -207,7 +210,7 @@ class InSourceTreeSitterQuery {
 		}
 	}
 
-	static fromQueryMatches(matches: Parser.QueryMatch[]): InSourceTreeSitterQuery[] {
+	static fromQueryMatches(matches: QueryMatch[]): InSourceTreeSitterQuery[] {
 		const captures = matches.flatMap(({ captures }) => captures)
 			.sort((a, b) => a.node.startIndex - b.node.startIndex || b.node.endIndex - a.node.endIndex);
 

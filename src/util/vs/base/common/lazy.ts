@@ -31,7 +31,7 @@ export class Lazy<T> {
 			try {
 				this._value = this.executor();
 			} catch (err) {
-				this._error = err;
+				this._error = err instanceof Error ? err : new Error(String(err));
 			} finally {
 				this._didRun = true;
 			}

@@ -15,7 +15,9 @@
     ],
     "activationEvents": [
         "onLanguage:typescript",
-        "onLanguage:json"
+        "onLanguage:json",
+        "onNotebook:tree-sitter-query",
+        "workspaceContains:**/*.tsqnb"
     ],
     "main": "./dist/extension.js",
     "browser": "./dist/web/extension.js",
@@ -29,6 +31,17 @@
                 ],
                 "extensions": [
                     ".scm"
+                ],
+                "configuration": "./language-configuration.json"
+            },
+            {
+                "id": "tsqnb",
+                "aliases": [
+                    "Tree-sitter Notebook",
+                    "tsqnb"
+                ],
+                "extensions": [
+                    ".tsqnb"
                 ],
                 "configuration": "./language-configuration.json"
             }
@@ -46,7 +59,7 @@
                 "displayName": "Tree-Sitter Query",
                 "selector": [
                     {
-                        "filenamePattern": "tsqnb"
+                        "filenamePattern": "*.tsqnb"
                     }
                 ]
             }

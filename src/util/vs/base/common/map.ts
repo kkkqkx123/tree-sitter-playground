@@ -127,28 +127,76 @@ export class ResourceMap<T> implements Map<URI, T> {
 		}
 	}
 
-	*values(): IterableIterator<T> {
-		for (const entry of this.map.values()) {
-			yield entry.value;
-		}
+	values(): MapIterator<T> {
+		const map = this.map.entries();
+		const iterator = map[Symbol.iterator]();
+
+		const result: MapIterator<T> = {
+			[Symbol.iterator]() {
+				return result;
+			},
+			next(): IteratorResult<T> {
+				const next = iterator.next();
+				if (next.done) {
+					return { value: undefined, done: true };
+				}
+				return { value: next.value[1].value, done: false };
+			},
+			[Symbol.dispose]() {
+				// 添加dispose方法以满足MapIterator接口要求
+			}
+		};
+		return result;
 	}
 
-	*keys(): IterableIterator<URI> {
-		for (const entry of this.map.values()) {
-			yield entry.uri;
-		}
+	keys(): MapIterator<URI> {
+		const map = this.map.entries();
+		const iterator = map[Symbol.iterator]();
+
+		const result: MapIterator<URI> = {
+			[Symbol.iterator]() {
+				return result;
+			},
+			next(): IteratorResult<URI> {
+				const next = iterator.next();
+				if (next.done) {
+					return { value: undefined, done: true };
+				}
+				const entry = next.value[1]; // ResourceMapEntry<T>
+				return { value: entry.uri, done: false };
+			},
+			[Symbol.dispose]() {
+				// 添加dispose方法以满足MapIterator接口要求
+			}
+		};
+		return result;
 	}
 
-	*entries(): IterableIterator<[URI, T]> {
-		for (const entry of this.map.values()) {
-			yield [entry.uri, entry.value];
-		}
+	entries(): MapIterator<[URI, T]> {
+		const map = this.map.entries();
+		const iterator = map[Symbol.iterator]();
+
+		const result: MapIterator<[URI, T]> = {
+			[Symbol.iterator]() {
+				return result;
+			},
+			next(): IteratorResult<[URI, T]> {
+				const next = iterator.next();
+				if (next.done) {
+					return { value: undefined, done: true };
+				}
+				const entry = next.value[1]; // ResourceMapEntry<T>
+				return { value: [entry.uri, entry.value], done: false };
+			},
+			[Symbol.dispose]() {
+				// 添加dispose方法以满足MapIterator接口要求
+			}
+		};
+		return result;
 	}
 
-	*[Symbol.iterator](): IterableIterator<[URI, T]> {
-		for (const [, entry] of this.map) {
-			yield [entry.uri, entry.value];
-		}
+	[Symbol.iterator](): MapIterator<[URI, T]> {
+		return this.entries();
 	}
 }
 
@@ -195,20 +243,92 @@ export class ResourceSet implements Set<URI> {
 		return this._map.has(value);
 	}
 
-	entries(): IterableIterator<[URI, URI]> {
-		return this._map.entries();
+	entries(): MapIterator<[URI, URI]> {
+		const map = this._map.entries();
+		const iterator = map[Symbol.iterator]();
+
+		const result: MapIterator<[URI, URI]> = {
+			[Symbol.iterator]() {
+				return result;
+			},
+			next(): IteratorResult<[URI, URI]> {
+				const next = iterator.next();
+				if (next.done) {
+					return { value: undefined, done: true };
+				}
+				return next;
+			},
+			[Symbol.dispose]() {
+				// 添加dispose方法以满足MapIterator接口要求
+			}
+		};
+		return result;
 	}
 
-	keys(): IterableIterator<URI> {
-		return this._map.keys();
+	keys(): SetIterator<URI> {
+		const map = this._map.entries();
+		const iterator = map[Symbol.iterator]();
+
+		const result: SetIterator<URI> = {
+			[Symbol.iterator]() {
+				return result;
+			},
+			next(): IteratorResult<URI> {
+				const next = iterator.next();
+				if (next.done) {
+					return { value: undefined, done: true };
+				}
+				return { value: next.value[0], done: false };
+			},
+			[Symbol.dispose]() {
+				// 添加dispose方法以满足SetIterator接口要求
+			}
+		};
+		return result;
 	}
 
-	values(): IterableIterator<URI> {
-		return this._map.keys();
+	values(): SetIterator<URI> {
+		const map = this._map.entries();
+		const iterator = map[Symbol.iterator]();
+
+		const result: SetIterator<URI> = {
+			[Symbol.iterator]() {
+				return result;
+			},
+			next(): IteratorResult<URI> {
+				const next = iterator.next();
+				if (next.done) {
+					return { value: undefined, done: true };
+				}
+				return { value: next.value[0], done: false };
+			},
+			[Symbol.dispose]() {
+				// 添加dispose方法以满足SetIterator接口要求
+			}
+		};
+		return result;
 	}
 
-	[Symbol.iterator](): IterableIterator<URI> {
-		return this.keys();
+	[Symbol.iterator](): SetIterator<URI> {
+		const map = this._map.entries();
+		const iterator = map[Symbol.iterator]();
+
+		const result: SetIterator<URI> = {
+			[Symbol.iterator]() {
+				return result;
+			},
+			next(): IteratorResult<URI> {
+				const next = iterator.next();
+				if (next.done) {
+					return { value: undefined, done: true };
+				}
+				return { value: next.value[0], done: false };
+			},
+			[Symbol.dispose]() {
+				// 添加dispose方法以满足SetIterator接口要求
+			}
+		};
+		return result;
 	}
 }
 
@@ -342,14 +462,14 @@ export class LinkedMap<K, V> implements Map<K, V> {
 		return item.value;
 	}
 
-	forEach(callbackfn: (value: V, key: K, map: LinkedMap<K, V>) => void, thisArg?: any): void {
+	forEach(callbackfn: (value: V, key: K, map: Map<K, V>) => void, thisArg?: any): void {
 		const state = this._state;
 		let current = this._head;
 		while (current) {
 			if (thisArg) {
-				callbackfn.bind(thisArg)(current.value, current.key, this);
+				callbackfn.bind(thisArg)(current.value, current.key, this as any);
 			} else {
-				callbackfn(current.value, current.key, this);
+				callbackfn(current.value, current.key, this as any);
 			}
 			if (this._state !== state) {
 				throw new Error(`LinkedMap got modified during iteration.`);
@@ -358,11 +478,11 @@ export class LinkedMap<K, V> implements Map<K, V> {
 		}
 	}
 
-	keys(): IterableIterator<K> {
+	keys(): MapIterator<K> {
 		const map = this;
 		const state = this._state;
 		let current = this._head;
-		const iterator: IterableIterator<K> = {
+		const iterator: MapIterator<K> = {
 			[Symbol.iterator]() {
 				return iterator;
 			},
@@ -377,16 +497,19 @@ export class LinkedMap<K, V> implements Map<K, V> {
 				} else {
 					return { value: undefined, done: true };
 				}
+			},
+			[Symbol.dispose]() {
+				// 添加dispose方法以满足MapIterator接口要求
 			}
 		};
 		return iterator;
 	}
 
-	values(): IterableIterator<V> {
+	values(): MapIterator<V> {
 		const map = this;
 		const state = this._state;
 		let current = this._head;
-		const iterator: IterableIterator<V> = {
+		const iterator: MapIterator<V> = {
 			[Symbol.iterator]() {
 				return iterator;
 			},
@@ -401,16 +524,19 @@ export class LinkedMap<K, V> implements Map<K, V> {
 				} else {
 					return { value: undefined, done: true };
 				}
+			},
+			[Symbol.dispose]() {
+				// 添加dispose方法以满足MapIterator接口要求
 			}
 		};
 		return iterator;
 	}
 
-	entries(): IterableIterator<[K, V]> {
+	entries(): MapIterator<[K, V]> {
 		const map = this;
 		const state = this._state;
 		let current = this._head;
-		const iterator: IterableIterator<[K, V]> = {
+		const iterator: MapIterator<[K, V]> = {
 			[Symbol.iterator]() {
 				return iterator;
 			},
@@ -425,12 +551,15 @@ export class LinkedMap<K, V> implements Map<K, V> {
 				} else {
 					return { value: undefined, done: true };
 				}
+			},
+			[Symbol.dispose]() {
+				// 添加dispose方法以满足MapIterator接口要求
 			}
 		};
 		return iterator;
 	}
 
-	[Symbol.iterator](): IterableIterator<[K, V]> {
+	[Symbol.iterator](): MapIterator<[K, V]> {
 		return this.entries();
 	}
 

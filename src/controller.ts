@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import Parser, { SyntaxNode } from 'web-tree-sitter';
+import { Parser, Node, Point } from 'web-tree-sitter';
 import { NotebookSerializer } from './serializer';
 import { getWasmLanguage, wasmLanguageLoader, } from './treeSitter';
 import { traverseDFPreOrder } from './treeTraversal';
@@ -63,44 +63,50 @@ export function createNotebookController(extensionUri: vscode.Uri) {
 			try {
 				const language = await getLanguage(extensionUri, parser, codeDocument!);
 				const parseTree = parser.parse(codeDocument!.getText());
-				cleanup.push(parseTree);
+				if (parseTree) {
+					cleanup.push(parseTree);
+				}
 
-				let data: string | Partial<SyntaxNode & { captureName: string }>[] = [];
+				let data: string | Partial<Node & { captureName: string }>[] = [];
 				if (isQueryCell(cell)) {
 					const queryResult = language.query(cell.document.getText());
 					cleanup.push(queryResult);
-					const matches = queryResult.matches(parseTree.rootNode);
-					for (const match of matches) {
-						for (const capture of match.captures) {
-							data.push({
-								captureName: capture.name,
-								type: capture.node.type,
-								text: capture.node.text,
-								startPosition: capture.node.startPosition,
-								endPosition: capture.node.endPosition,
-							});
+					if (parseTree) {
+						const matches = queryResult.matches(parseTree.rootNode);
+						for (const match of matches) {
+							for (const capture of match.captures) {
+								data.push({
+									captureName: capture.name,
+									type: capture.node.type,
+									text: capture.node.text,
+									startPosition: capture.node.startPosition,
+									endPosition: capture.node.endPosition,
+								});
+							}
 						}
 					}
 
 					await updateOutput(execution, 'application/json', data);
 				} else {
-					const nodeData: { depth: number; uri: string, node: { fieldName: string; type: string; startPosition: Parser.Point; endPosition: Parser.Point } }[] = [];
-					traverseDFPreOrder(parseTree.rootNode, (cursor, depth) => {
-						const currentNode = cursor.currentNode();
-						if (!currentNode.isNamed()) {
-							return;
-						}
-						nodeData.push({
-							depth,
-							uri: codeDocument!.uri.toString(),
-							node: {
-								fieldName: cursor.currentFieldName(),
-								type: currentNode.type,
-								startPosition: currentNode.startPosition, // TODO@joyceerhl scope this to just the identifier name
-								endPosition: currentNode.endPosition,
+					const nodeData: { depth: number; uri: string, node: { fieldName: string; type: string; startPosition: Point; endPosition: Point } }[] = [];
+					if (parseTree) {
+						traverseDFPreOrder(parseTree.rootNode, (cursor, depth) => {
+							const currentNode = cursor.currentNode;
+							if (!currentNode.isNamed) {
+								return;
 							}
+							nodeData.push({
+								depth,
+								uri: codeDocument!.uri.toString(),
+								node: {
+									fieldName: cursor.currentFieldName || '',
+									type: currentNode.type,
+									startPosition: currentNode.startPosition, // TODO@joyceerhl scope this to just the identifier name
+									endPosition: currentNode.endPosition,
+								}
+							});
 						});
-					});
+					}
 					await updateOutput(execution, 'x-application/tree-sitter', { nodes: nodeData });
 				}
 

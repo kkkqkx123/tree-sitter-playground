@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import Parser from 'web-tree-sitter';
+import { Parser } from 'web-tree-sitter';
 import { createNotebookController } from './controller';
 import { NodeTypesDefinitionProvider } from './nodeTypesDefinitionProvider';
 import { NodeTypesOutlineProvider } from './nodeTypesOutlineProvider';

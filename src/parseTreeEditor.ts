@@ -1,13 +1,13 @@
 import * as vscode from 'vscode';
-import Parser from 'web-tree-sitter';
+import { Parser, Node, Point, Tree } from 'web-tree-sitter';
 import { printParseTree } from './parseTreePrinter';
 import { getWasmLanguage, WASMLanguage, wasmLanguageLoader } from './treeSitter';
 
 const PARSE_TREE_EDITOR_VIEW_TYPE = 'vscode-treesitter-parse-tree-editor';
 
 type OriginalFileRange = {
-	start: Parser.Point;
-	end: Parser.Point;
+	start: Point;
+	end: Point;
 	uri?: string;
 };
 
@@ -32,7 +32,7 @@ export class ParseTreeEditor {
 	 *
 	 * @internal Should only be used by `getParseTree`
 	 * */
-	private __parseTree: undefined | { documentVersion: number; tree: Parser.Tree } = undefined;
+	private __parseTree: undefined | { documentVersion: number; tree: Tree } = undefined;
 
 	private readonly _wasmLang: WASMLanguage;
 
@@ -85,6 +85,10 @@ export class ParseTreeEditor {
 			{ row: selection.end.line, column: selection.end.character },
 		);
 
+		if (!node) {
+			return;
+		}
+
 		webviewPanel.webview.postMessage({
 			eventKind: 'selectedNodeChange',
 			selectedNodeRange: {
@@ -115,6 +119,10 @@ export class ParseTreeEditor {
 			parser.setLanguage(language);
 
 			const tree = parser.parse(document.getText());
+
+			if (!tree) {
+				continue;
+			}
 
 			this.__parseTree = { documentVersion: docVersion, tree };
 		}
@@ -234,7 +242,7 @@ export class ParseTreeEditor {
 		});
 	}
 
-	static renderNode(node: Parser.SyntaxNode, depth: number, fieldName: string | undefined, uri: vscode.Uri | undefined) {
+	static renderNode(node: Node, depth: number, fieldName: string | undefined, uri: vscode.Uri | undefined) {
 		const fieldNameStr = fieldName ? `${fieldName}: ` : '';
 		const range: OriginalFileRange = {
 			start: node.startPosition,

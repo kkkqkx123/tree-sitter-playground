@@ -110,20 +110,71 @@ export class SetWithKey<T> implements Set<T> {
 		return this._map.has(this.toKey(value));
 	}
 
-	*entries(): IterableIterator<[T, T]> {
-		for (const entry of this._map.values()) {
-			yield [entry, entry];
-		}
+	entries(): SetIterator<[T, T]> {
+		const map = this._map.values();
+		const iterator = map[Symbol.iterator]();
+		
+		const result: SetIterator<[T, T]> = {
+			[Symbol.iterator]() {
+				return result;
+			},
+			next(): IteratorResult<[T, T]> {
+				const next = iterator.next();
+				if (next.done) {
+					return { value: undefined, done: true };
+				}
+				const entry = next.value;
+				return { value: [entry, entry], done: false };
+			},
+			[Symbol.dispose]() {
+				// 添加dispose方法以满足SetIterator接口要求
+			}
+		};
+		return result;
 	}
 
-	keys(): IterableIterator<T> {
-		return this.values();
+	keys(): SetIterator<T> {
+		const map = this._map.values();
+		const iterator = map[Symbol.iterator]();
+		
+		const result: SetIterator<T> = {
+			[Symbol.iterator]() {
+				return result;
+			},
+			next(): IteratorResult<T> {
+				const next = iterator.next();
+				if (next.done) {
+					return { value: undefined, done: true };
+				}
+				return { value: next.value, done: false };
+			},
+			[Symbol.dispose]() {
+				// 添加dispose方法以满足SetIterator接口要求
+			}
+		};
+		return result;
 	}
 
-	*values(): IterableIterator<T> {
-		for (const entry of this._map.values()) {
-			yield entry;
-		}
+	values(): SetIterator<T> {
+		const map = this._map.values();
+		const iterator = map[Symbol.iterator]();
+		
+		const result: SetIterator<T> = {
+			[Symbol.iterator]() {
+				return result;
+			},
+			next(): IteratorResult<T> {
+				const next = iterator.next();
+				if (next.done) {
+					return { value: undefined, done: true };
+				}
+				return { value: next.value, done: false };
+			},
+			[Symbol.dispose]() {
+				// 添加dispose方法以满足SetIterator接口要求
+			}
+		};
+		return result;
 	}
 
 	clear(): void {
@@ -134,8 +185,26 @@ export class SetWithKey<T> implements Set<T> {
 		this._map.forEach(entry => callbackfn.call(thisArg, entry, entry, this));
 	}
 
-	[Symbol.iterator](): IterableIterator<T> {
-		return this.values();
+	[Symbol.iterator](): SetIterator<T> {
+		const map = this._map.values();
+		const iterator = map[Symbol.iterator]();
+		
+		const result: SetIterator<T> = {
+			[Symbol.iterator]() {
+				return result;
+			},
+			next(): IteratorResult<T> {
+				const next = iterator.next();
+				if (next.done) {
+					return { value: undefined, done: true };
+				}
+				return { value: next.value, done: false };
+			},
+			[Symbol.dispose]() {
+				// 添加dispose方法以满足SetIterator接口要求
+			}
+		};
+		return result;
 	}
 
 	[Symbol.toStringTag]: string = 'SetWithKey';
