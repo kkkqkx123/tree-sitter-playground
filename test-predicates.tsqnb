@@ -1,0 +1,14 @@
+{
+  "cells": [
+    {
+      "code": "const x = 1;\nconsole.log(x);\nconst PI = 3.14;\nconst MAX_VALUE = 1000;",
+      "language": "javascript",
+      "kind": "code"
+    },
+    {
+      "code": ";;javascript\n((identifier) @constant\n (#match? @constant \"^[A-Z][A-Z_]+\"))",
+      "language": "scm",
+      "kind": "code"
+    }
+  ]
+}

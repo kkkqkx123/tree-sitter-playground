@@ -1,0 +1,24 @@
+{
+  "cells": [
+    {
+      "code": "const x = 1;\nconsole.log(x);\nconst PI = 3.14;\nconst MAX_VALUE = 1000;\nfunction myFunction() { return 'hello'; }\nfunction anotherFunc() { return 'world'; }",
+      "language": "javascript",
+      "kind": "code"
+    },
+    {
+      "code": ";;javascript\n;; Test #eq? predicate\n((identifier) @function.name\n (#eq? @function.name \"myFunction\"))",
+      "language": "scm",
+      "kind": "code"
+    },
+    {
+      "code": ";;javascript\n;; Test #any-of? predicate\n((identifier) @constant\n (#any-of? @constant \"PI\" \"MAX_VALUE\"))",
+      "language": "scm",
+      "kind": "code"
+    },
+    {
+      "code": ";;javascript\n;; Test #is-not? predicate\n((identifier) @variable.builtin\n (#match? @variable.builtin \"^(arguments|console)$\")\n (#is-not? local))",
+      "language": "scm",
+      "kind": "code"
+    }
+  ]
+}

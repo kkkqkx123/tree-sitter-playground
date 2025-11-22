@@ -104,11 +104,11 @@
         "watch-tests": "tsc -p . -w --outDir out",
         "pretest": "npm run compile-tests && npm run compile && npm run lint",
         "lint": "eslint src --ext ts",
-        "build-wasm": "ts-node src/buildWasm.ts && cp node_modules/web-tree-sitter/tree-sitter.wasm src/.wasm/"
+        "build-wasm": "ts-node src/buildWasm.ts && copy node_modules\\web-tree-sitter\\tree-sitter.wasm src\\.wasm\\"
     },
     "devDependencies": {
         "@types/node": "24.10.1",
-        "@types/vscode": "^1.106.0",
+        "@types/vscode": "^1.84.0",
         "@types/vscode-notebook-renderer": "^1.72.4",
         "@typescript-eslint/eslint-plugin": "^8.46.4",
         "@typescript-eslint/parser": "^8.46.4",
