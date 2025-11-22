@@ -53,6 +53,15 @@
                 ]
             }
         ],
+        "notebookEditor": {
+            "viewType": "tree-sitter-query",
+            "displayName": "Tree-sitter Query Notebook",
+            "selector": [
+                {
+                    "filenamePattern": "*.tsqnb"
+                }
+            ]
+        },
         "files": {
             "associations": {}
         },

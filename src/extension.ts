@@ -38,7 +38,16 @@ export async function activate(context: vscode.ExtensionContext) {
 
 		// Register notebook serializer with error handling
 		const serializerRegistration = vscode.workspace.registerNotebookSerializer('tree-sitter-query', serializer);
-		console.log('[TreeSitter Extension] Registered notebook serializer');
+		console.log('[TreeSitter Extension] Registered notebook serializer for type: tree-sitter-query');
+		
+		// Test notebook opening capability
+		console.log('[TreeSitter Extension] Testing notebook opening capability...');
+		try {
+			const testUri = vscode.Uri.file(context.asAbsolutePath('test.tsqnb'));
+			console.log('[TreeSitter Extension] Test notebook URI:', testUri.toString());
+		} catch (error) {
+			console.error('[TreeSitter Extension] Test notebook URI creation failed:', error);
+		}
 
 		context.subscriptions.push(
 			serializerRegistration,
