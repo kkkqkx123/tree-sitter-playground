@@ -1,0 +1,14 @@
+{
+  "cells": [
+    {
+      "code": "// Welcome to Tree-sitter Query Notebook!\n// This is a JavaScript code cell where you can write your source code\nfunction fibonacci(n) {\n  if (n <= 1) return n;\n  return fibonacci(n - 1) + fibonacci(n - 2);\n}\n\nconst result = fibonacci(10);\nconsole.log('Fibonacci(10) =', result);",
+      "language": "javascript",
+      "kind": "code"
+    },
+    {
+      "code": "; This is a Tree-sitter query cell\n; Write your tree-sitter queries here to analyze the JavaScript code\n\n; Find all function declarations\n(function_declaration\n  name: (identifier) @function_name)\n\n; Find all function calls\n(call_expression\n  function: (identifier) @function_call)\n\n; Find all identifiers\n(identifier) @identifier",
+      "language": "scm",
+      "kind": "code"
+    }
+  ]
+}

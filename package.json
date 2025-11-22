@@ -1,11 +1,11 @@
 {
-    "name": "vscode-tree-sitter-query",
-    "displayName": "vscode-tree-sitter-query",
-    "publisher": "jrieken",
+    "name": "vscode-tree-sitter-playground",
+    "displayName": "vscode-tree-sitter-playground",
+    "publisher": "kkkqkx123",
     "description": "Tools for working with Tree-Sitter",
-    "version": "0.0.6",
+    "version": "0.0.1",
     "repository": {
-        "url": "https://github.com/jrieken/vscode-tree-sitter-query"
+        "url": "https://github.com/kkkqkx123/tree-sitter-playground"
     },
     "engines": {
         "vscode": "^1.84.0"
@@ -33,17 +33,6 @@
                     ".scm"
                 ],
                 "configuration": "./language-configuration.json"
-            },
-            {
-                "id": "tsqnb",
-                "aliases": [
-                    "Tree-sitter Notebook",
-                    "tsqnb"
-                ],
-                "extensions": [
-                    ".tsqnb"
-                ],
-                "configuration": "./language-configuration.json"
             }
         ],
         "grammars": [
@@ -56,7 +45,7 @@
         "notebooks": [
             {
                 "type": "tree-sitter-query",
-                "displayName": "Tree-Sitter Query",
+                "displayName": "Tree-sitter Query Notebook",
                 "selector": [
                     {
                         "filenamePattern": "*.tsqnb"
@@ -64,6 +53,9 @@
                 ]
             }
         ],
+        "files": {
+            "associations": {}
+        },
         "notebookRenderer": [
             {
                 "id": "tree-sitter-notebook",
@@ -104,7 +96,7 @@
         "watch-tests": "tsc -p . -w --outDir out",
         "pretest": "npm run compile-tests && npm run compile && npm run lint",
         "lint": "eslint src --ext ts",
-        "build-wasm": "ts-node src/buildWasm.ts && copy node_modules\\web-tree-sitter\\tree-sitter.wasm src\\.wasm\\"
+        "build-wasm": "ts-node src/buildWasm.ts && copy node_modules\\web-tree-sitter\\tree-sitter.wasm src\\.wasm\\ && copy src\\.wasm\\*.wasm dist\\ 2>nul || (exit 0)"
     },
     "devDependencies": {
         "@types/node": "24.10.1",

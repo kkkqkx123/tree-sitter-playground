@@ -53,34 +53,19 @@ export async function ensureWasm(grammar: ITreeSitterGrammar, outputPath: string
 		});
 	}
 
-	// Rename to a consistent name if necessary
-	if (grammar.filename) {
-		const sourceName = grammar.filename;
-		const targetName = `${grammar.name}.wasm`;
-		const sourcePath = path.join(outputPath, sourceName);
+	// The WASM file is generated in the current directory, move it to the output directory
+	const currentDir = path.resolve(PROJECT_ROOT, '..');
+	const wasmFiles = await fs.promises.readdir(currentDir);
+	const generatedWasmFile = wasmFiles.find(file => file.endsWith('.wasm') && file.includes(grammar.name.replace('tree-sitter-', '')));
+	
+	if (generatedWasmFile) {
+		const sourcePath = path.join(currentDir, generatedWasmFile);
+		const targetName = grammar.filename || `${grammar.name}.wasm`;
 		const targetPath = path.join(outputPath, targetName);
 		
-		// Check if source file exists with the expected name
-		try {
-			await fs.promises.access(sourcePath);
-			await fs.promises.rename(sourcePath, targetPath);
-		} catch {
-			// If the expected name doesn't exist, try to find the actual generated file
-			// It might be generated with the default name
-			const defaultName = `${grammar.name.replace('tree-sitter-', '')}.wasm`;
-			const defaultPath = path.join(outputPath, defaultName);
-			try {
-				await fs.promises.access(defaultPath);
-				await fs.promises.rename(defaultPath, targetPath);
-			} catch {
-				// If neither expected name exists, try to find any .wasm file in the output directory
-				const files = await fs.promises.readdir(outputPath);
-				const wasmFile = files.find(file => file.endsWith('.wasm') && file.includes(grammar.name.replace('tree-sitter-', '')));
-				if (wasmFile) {
-					const foundPath = path.join(outputPath, wasmFile);
-					await fs.promises.rename(foundPath, targetPath);
-				}
-			}
-		}
+		console.log(`Moving ${sourcePath} to ${targetPath}`);
+		await fs.promises.rename(sourcePath, targetPath);
+	} else {
+		console.error(`Warning: No WASM file generated for ${grammar.name}`);
 	}
 }

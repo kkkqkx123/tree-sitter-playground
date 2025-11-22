@@ -16,33 +16,100 @@ export class NotebookSerializer implements vscode.NotebookSerializer {
 	}
 
 	deserializeNotebook(content: Uint8Array, token: vscode.CancellationToken): vscode.NotebookData {
-		const stringified = content.length === 0 ? new TextDecoder().decode(this.serializeNotebook(this.createNew())) : new TextDecoder().decode(content);
-		const data = JSON.parse(stringified);
-		if (!('cells' in data)) {
-			throw new Error('Unable to parse provided notebook content, missing required `cells` property.');
+		console.log('[TreeSitter Notebook] Starting deserialization, content length:', content.length);
+
+		// Handle empty content by creating a new notebook
+		if (content.length === 0) {
+			console.log('[TreeSitter Notebook] Empty content detected, creating new notebook');
+			return this.createNew();
 		}
-		if (!Array.isArray(data.cells)) {
-			throw new Error('Unable to parse provided notebook contents, `cells` is not an array.');
+
+		try {
+			// Parse existing content
+			const stringified = new TextDecoder().decode(content);
+			console.log('[TreeSitter Notebook] Decoded content:', stringified.substring(0, 200) + (stringified.length > 200 ? '...' : ''));
+
+			let data: any;
+			try {
+				data = JSON.parse(stringified);
+				console.log('[TreeSitter Notebook] JSON parsed successfully');
+			} catch (parseError) {
+				console.error('[TreeSitter Notebook] JSON parsing failed:', parseError);
+				throw new Error(`Unable to parse notebook content: Invalid JSON format. ${parseError}`);
+			}
+
+			if (!data || typeof data !== 'object') {
+				throw new Error('Unable to parse notebook content: Root element must be an object.');
+			}
+
+			if (!('cells' in data)) {
+				console.error('[TreeSitter Notebook] Missing cells property in data');
+				throw new Error('Unable to parse provided notebook content, missing required `cells` property.');
+			}
+
+			if (!Array.isArray(data.cells)) {
+				console.error('[TreeSitter Notebook] Cells property is not an array:', typeof data.cells);
+				throw new Error('Unable to parse notebook contents, `cells` is not an array.');
+			}
+
+			console.log('[TreeSitter Notebook] Processing', data.cells.length, 'cells');
+
+			const cells: vscode.NotebookCellData[] = data.cells
+				.map((cell: any, index: number) => {
+					console.log(`[TreeSitter Notebook] Processing cell ${index}:`, JSON.stringify(cell).substring(0, 100));
+
+					if (typeof cell !== 'object' || cell === null) {
+						console.warn(`[TreeSitter Notebook] Skipping cell ${index}: not an object`);
+						return null;
+					}
+
+					// Validate required properties
+					if (!cell.hasOwnProperty('code')) {
+						console.warn(`[TreeSitter Notebook] Skipping cell ${index}: missing 'code' property`);
+						return null;
+					}
+
+					if (!cell.hasOwnProperty('kind')) {
+						console.warn(`[TreeSitter Notebook] Skipping cell ${index}: missing 'kind' property`);
+						return null;
+					}
+
+					const cellKind = cell.kind === 'code' ? vscode.NotebookCellKind.Code : vscode.NotebookCellKind.Markup;
+					const language = cell.kind === 'code' ? (cell.language ?? NotebookSerializer.queryLanguageId) : 'markdown';
+
+					console.log(`[TreeSitter Notebook] Creating cell ${index}: kind=${cell.kind}, language=${language}`);
+					return new vscode.NotebookCellData(cellKind, String(cell.code), language);
+				})
+				.filter((cell: vscode.NotebookCellData | null): cell is vscode.NotebookCellData => {
+					if (cell === null) {
+						return false;
+					}
+					// Additional validation
+					if (!cell.value || typeof cell.value !== 'string') {
+						console.warn('[TreeSitter Notebook] Skipping cell: invalid value');
+						return false;
+					}
+					if (!cell.languageId || typeof cell.languageId !== 'string') {
+						console.warn('[TreeSitter Notebook] Skipping cell: invalid language');
+						return false;
+					}
+					return true;
+				});
+
+			console.log('[TreeSitter Notebook] Successfully processed', cells.length, 'valid cells');
+
+			if (cells.length === 0) {
+				console.warn('[TreeSitter Notebook] No valid cells found, creating default notebook');
+				return this.createNew();
+			}
+
+			return new vscode.NotebookData(cells);
+
+		} catch (error) {
+			console.error('[TreeSitter Notebook] Deserialization failed:', error);
+			// Provide a more helpful error message
+			const errorMessage = error instanceof Error ? error.message : String(error);
+			throw new Error(`Failed to load Tree-sitter Notebook: ${errorMessage}`);
 		}
-		const cells: (vscode.NotebookCellData | undefined)[] = data.cells.map((cell: unknown) => {
-			if (typeof cell !== 'object' || cell === null) {
-				return undefined;
-			}
-			if (cell.hasOwnProperty('code') && cell.hasOwnProperty('kind') && 'kind' in cell) {
-				const graphqlCell = cell as unknown as { code: string, kind: 'markdown' | 'code', language?: string };
-				return new vscode.NotebookCellData(
-					graphqlCell.kind === 'code' ? vscode.NotebookCellKind.Code : vscode.NotebookCellKind.Markup,
-					graphqlCell.code,
-					graphqlCell.kind === 'code' ? (graphqlCell.language ?? NotebookSerializer.queryLanguageId) : 'markdown',
-				);
-			}
-		});
-		const cellData: vscode.NotebookCellData[] = [];
-		for (const cell of cells) {
-			if (cell !== undefined) {
-				cellData.push(cell);
-			}
-		}
-		return new vscode.NotebookData(cellData);
 	}
 }

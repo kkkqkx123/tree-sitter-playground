@@ -1,5 +1,5 @@
 import { Uri } from 'vscode';
-import { Parser, Language } from "web-tree-sitter";
+import { Language } from "web-tree-sitter";
 
 export function getWasmLanguage(languageId: string) {
     switch (languageId) {
