@@ -10,7 +10,17 @@ export class NotebookSerializer implements vscode.NotebookSerializer {
 
 	serializeNotebook(data: vscode.NotebookData, token?: vscode.CancellationToken): Uint8Array {
 		const cells = data.cells.map((cell) => {
-			return { code: cell.value, language: cell.languageId, kind: cell.kind === vscode.NotebookCellKind.Markup ? 'markdown' : 'code' };
+			const outputs = (cell.outputs || []).map((output) => {
+				const items = output.items.map((item) => {
+					const dataBytes = Array.from(item.data);
+					return {
+						mime: item.mime,
+						data: dataBytes
+					};
+				});
+				return { items };
+			});
+			return { code: cell.value, language: cell.languageId, kind: cell.kind === vscode.NotebookCellKind.Markup ? 'markdown' : 'code', outputs };
 		});
 		return new TextEncoder().encode(JSON.stringify({ cells }));
 	}
@@ -77,8 +87,23 @@ export class NotebookSerializer implements vscode.NotebookSerializer {
 					const cellKind = cell.kind === 'code' ? vscode.NotebookCellKind.Code : vscode.NotebookCellKind.Markup;
 					const language = cell.kind === 'code' ? (cell.language ?? NotebookSerializer.queryLanguageId) : 'markdown';
 
-					console.log(`[TreeSitter Notebook] Creating cell ${index}: kind=${cell.kind}, language=${language}`);
-					return new vscode.NotebookCellData(cellKind, String(cell.code), language);
+					const outputs: vscode.NotebookCellOutput[] = [];
+					if (cell.outputs && Array.isArray(cell.outputs)) {
+						for (const output of cell.outputs) {
+							if (output.items && Array.isArray(output.items)) {
+								const items = output.items.map((item: any) => {
+									const dataBytes = new Uint8Array(Array.isArray(item.data) ? item.data : []);
+									return new vscode.NotebookCellOutputItem(dataBytes, item.mime);
+								});
+								outputs.push(new vscode.NotebookCellOutput(items));
+							}
+						}
+					}
+
+					console.log(`[TreeSitter Notebook] Creating cell ${index}: kind=${cell.kind}, language=${language}, outputs=${outputs.length}`);
+					const cellData = new vscode.NotebookCellData(cellKind, String(cell.code), language);
+					cellData.outputs = outputs;
+					return cellData;
 				})
 				.filter((cell: vscode.NotebookCellData | null): cell is vscode.NotebookCellData => {
 					if (cell === null) {

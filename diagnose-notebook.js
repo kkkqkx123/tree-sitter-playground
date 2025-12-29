@@ -10,11 +10,11 @@ if (fs.existsSync(testFile)) {
     console.log('   ✅ 文件存在');
     const content = fs.readFileSync(testFile, 'utf8');
     console.log('   📄 文件大小:', content.length, '字节');
-    
+
     try {
         const json = JSON.parse(content);
         console.log('   ✅ JSON格式正确');
-        
+
         if (json.cells && Array.isArray(json.cells)) {
             console.log('   📋 单元格数量:', json.cells.length);
             json.cells.forEach((cell, index) => {
@@ -54,14 +54,14 @@ const distDir = path.join(__dirname, 'dist');
 if (fs.existsSync(distDir)) {
     const wasmFiles = fs.readdirSync(distDir).filter(f => f.endsWith('.wasm'));
     console.log('   📁 dist目录WASM文件数量:', wasmFiles.length);
-    
+
     const requiredWasm = [
         'tree-sitter.wasm',
         'tree-sitter-c_sharp.wasm',
         'tree-sitter-javascript.wasm',
         'tree-sitter-typescript.wasm'
     ];
-    
+
     requiredWasm.forEach(wasm => {
         if (wasmFiles.includes(wasm)) {
             console.log(`   ✅ ${wasm} 存在`);
